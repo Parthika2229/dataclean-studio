@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DataClean Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0e0f11;
+    --surface: #161719;
+    --surface2: #1e2023;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.13);
+    --accent: #00e5a0;
+    --accent2: #00b87a;
+    --accent-dim: rgba(0,229,160,0.12);
+    --text: #f0f0ee;
+    --muted: #888b8d;
+    --danger: #ff6b6b;
+    --warn: #ffb347;
+    --info: #5bb8ff;
+    --font-display: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+    --radius: 10px;
+    --radius-lg: 16px;
+  }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* === HEADER === */
+  .header {
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    height: 64px;
+    flex-shrink: 0;
+  }
+  .header-left { display: flex; align-items: center; gap: 16px; }
+  .header-left h1 {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: var(--text);
+  }
+  .header-left h1 span { color: var(--accent); }
+  .header-left p {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: var(--font-mono);
+  }
+  .badge {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border2);
+    color: var(--muted);
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+
+  /* === APP LAYOUT === */
+  .app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+  .main {
+    display: grid;
+    grid-template-columns: 270px 1fr;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* === SIDEBAR === */
+  .sidebar {
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 16px 0;
+    background: var(--surface);
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: transparent; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+  .sidebar-section {
+    padding: 0 14px 14px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 4px;
+  }
+  .sidebar-section:last-child { border-bottom: none; }
+  .sidebar-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 10px 0 8px;
+    display: block;
+  }
+
+  /* === UPLOAD === */
+  .upload-zone {
+    border: 1.5px dashed var(--border2);
+    border-radius: var(--radius);
+    padding: 18px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .upload-zone:hover, .upload-zone.drag-over {
+    border-color: var(--accent);
+    background: var(--accent-dim);
+  }
+  .upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .upload-icon {
+    width: 32px; height: 32px;
+    background: var(--accent-dim);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 8px;
+    font-size: 16px;
+  }
+  .upload-zone p { font-size: 11px; color: var(--muted); }
+  .upload-zone strong { color: var(--accent); font-size: 12px; }
+
+  /* === OP BUTTONS === */
+  .op-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: var(--radius);
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--muted);
+    font-family: var(--font-body);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: left;
+    margin-bottom: 2px;
+  }
+  .op-btn:hover { background: var(--surface2); color: var(--text); border-color: var(--border); }
+  .op-btn.active { background: var(--accent-dim); color: var(--accent); border-color: rgba(0,229,160,0.3); }
+  .op-btn .op-icon {
+    width: 26px; height: 26px;
+    border-radius: 6px;
+    background: var(--surface2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+  .op-btn.active .op-icon { background: rgba(0,229,160,0.15); }
+
+  /* === CONTENT AREA === */
+  .content {
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+  }
+  .content::-webkit-scrollbar { width: 4px; }
+  .content::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+  /* === STATS BAR === */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    background: var(--surface);
+  }
+  .stat-item {
+    padding: 12px 18px;
+    border-right: 1px solid var(--border);
+  }
+  .stat-item:last-child { border-right: none; }
+  .stat-label { font-size: 10px; font-family: var(--font-mono); color: var(--muted); letter-spacing: 0.8px; text-transform: uppercase; }
+  .stat-value { font-size: 20px; font-family: var(--font-display); font-weight: 700; margin-top: 2px; }
+  .stat-value.ok { color: var(--accent); }
+  .stat-value.warn { color: var(--warn); }
+  .stat-value.danger { color: var(--danger); }
+
+  /* === PANELS === */
+  .panel { flex: 1; display: none; padding: 24px 28px; overflow-y: auto; }
+  .panel.active { display: block; }
+  .panel-title {
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .panel-desc { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+
+  /* === TABLE === */
+  .table-wrap {
+    overflow: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    max-height: 320px;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; font-family: var(--font-mono); }
+  thead { position: sticky; top: 0; z-index: 2; }
+  th {
+    background: var(--surface2); color: var(--muted);
+    padding: 8px 12px; text-align: left; font-weight: 500;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap; font-size: 11px; letter-spacing: 0.5px;
+  }
+  td {
+    padding: 7px 12px; border-bottom: 1px solid var(--border);
+    color: var(--text); white-space: nowrap;
+    max-width: 160px; overflow: hidden; text-overflow: ellipsis;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface2); }
+  td.cell-empty { color: var(--danger); font-style: italic; opacity: 0.7; }
+  td.cell-dup { background: rgba(255,179,71,0.08); }
+  .row-index { color: var(--muted); font-size: 11px; user-select: none; }
+
+  /* === OPTION CARDS === */
+  .option-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .option-card {
+    border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 14px; cursor: pointer; transition: all 0.15s; position: relative;
+  }
+  .option-card:hover { border-color: var(--border2); background: var(--surface2); }
+  .option-card.selected { border-color: var(--accent); background: var(--accent-dim); }
+  .option-card .oc-icon { font-size: 18px; margin-bottom: 6px; }
+  .option-card .oc-title { font-size: 13px; font-weight: 500; color: var(--text); }
+  .option-card .oc-desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .option-card .check {
+    position: absolute; top: 10px; right: 10px;
+    width: 16px; height: 16px; border-radius: 50%;
+    background: var(--accent); display: none;
+    align-items: center; justify-content: center;
+    font-size: 9px; color: #000;
+  }
+  .option-card.selected .check { display: flex; }
+
+  /* === CONTROLS === */
+  .ctrl-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .ctrl-label { font-size: 12px; color: var(--muted); min-width: 150px; }
+  select, input[type=text], input[type=number] {
+    background: var(--surface2); border: 1px solid var(--border2);
+    border-radius: 6px; color: var(--text);
+    font-family: var(--font-mono); font-size: 12px;
+    padding: 7px 10px; outline: none; transition: border-color 0.15s;
+  }
+  select:focus, input[type=text]:focus, input[type=number]:focus { border-color: var(--accent); }
+  select { cursor: pointer; }
+
+  /* === BUTTONS === */
+  .btn {
+    padding: 9px 18px; border-radius: var(--radius);
+    font-family: var(--font-body); font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: all 0.15s; border: none;
+  }
+  .btn-primary { background: var(--accent); color: #000; }
+  .btn-primary:hover { background: #1af5b0; transform: translateY(-1px); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border2); }
+  .btn-ghost:hover { color: var(--text); border-color: var(--border); }
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+
+  /* === LOG === */
+  .log-wrap {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px 16px;
+    margin-top: 16px; max-height: 130px; overflow-y: auto;
+  }
+  .log-wrap::-webkit-scrollbar { width: 3px; }
+  .log-wrap::-webkit-scrollbar-thumb { background: var(--border2); }
+  .log-entry { font-family: var(--font-mono); font-size: 11px; padding: 3px 0; display: flex; gap: 10px; }
+  .log-entry .ts { color: var(--muted); }
+  .log-entry .msg { color: var(--text); }
+  .log-entry.ok .msg { color: var(--accent); }
+  .log-entry.warn .msg { color: var(--warn); }
+  .log-entry.err .msg { color: var(--danger); }
+
+  /* === ISSUES === */
+  .issues-list { display: flex; flex-direction: column; gap: 6px; }
+  .issue-item {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 14px; font-size: 12px;
+  }
+  .issue-tag {
+    font-family: var(--font-mono); font-size: 10px;
+    padding: 2px 8px; border-radius: 20px; flex-shrink: 0;
+  }
+  .issue-tag.empty { background: rgba(255,107,107,0.15); color: var(--danger); }
+  .issue-tag.dup { background: rgba(255,179,71,0.15); color: var(--warn); }
+  .issue-tag.type { background: rgba(91,184,255,0.15); color: var(--info); }
+  .issue-tag.format { background: rgba(0,229,160,0.1); color: var(--accent); }
+
+  /* === TRANSFORM === */
+  .transform-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .transform-item {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 12px 14px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .transform-item label { font-size: 12px; color: var(--text); }
+  .transform-item .ti-desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* === TOGGLE === */
+  .toggle { position: relative; display: inline-block; width: 32px; height: 18px; flex-shrink: 0; }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .slider-track {
+    position: absolute; cursor: pointer; inset: 0;
+    background: var(--surface); border: 1px solid var(--border2);
+    border-radius: 18px; transition: 0.2s;
+  }
+  .slider-track:before {
+    content: ""; position: absolute;
+    height: 12px; width: 12px; left: 2px; top: 2px;
+    background: var(--muted); border-radius: 50%; transition: 0.2s;
+  }
+  input:checked + .slider-track { background: var(--accent-dim); border-color: var(--accent); }
+  input:checked + .slider-track:before { transform: translateX(14px); background: var(--accent); }
+
+  /* === EMPTY STATE === */
+  .empty-state {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; padding: 60px 40px; color: var(--muted);
+  }
+  .empty-icon {
+    width: 60px; height: 60px; border-radius: 18px;
+    background: var(--surface2); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px; margin-bottom: 16px;
+  }
+  .empty-state h3 { font-family: var(--font-display); font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+  .empty-state p { font-size: 12px; max-width: 280px; line-height: 1.7; }
+
+  /* === EXPORT === */
+  .export-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .export-card {
+    border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 20px; text-align: center; cursor: pointer; transition: all 0.15s;
+  }
+  .export-card:hover { border-color: var(--accent); background: var(--accent-dim); }
+  .export-card .ec-icon { font-size: 24px; margin-bottom: 8px; }
+  .export-card .ec-title { font-size: 14px; font-weight: 600; }
+  .export-card .ec-ext { font-family: var(--font-mono); font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+  /* === SUMMARY BOX === */
+  .summary-box {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px 18px; margin-top: 20px;
+  }
+  .summary-box .sb-label { font-family: var(--font-mono); font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+  .summary-box p { font-size: 13px; color: var(--text); }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-left">
+      <div>
+        <h1>Data<span>Clean</span> Studio</h1>
+        <p>// upload → inspect → transform → export</p>
+      </div>
+    </div>
+    <span class="badge" id="file-badge">no file loaded</span>
+  </div>
+
+  <div class="main">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+
+      <div class="sidebar-section">
+        <span class="sidebar-label">Source</span>
+        <div class="upload-zone" id="upload-zone">
+          <input type="file" id="file-input" accept=".csv,.tsv,.json,.txt" />
+          <div class="upload-icon">📂</div>
+          <strong>Drop file here</strong>
+          <p>CSV · TSV · JSON · TXT</p>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <span class="sidebar-label">Operations</span>
+        <button class="op-btn active" onclick="switchPanel(this,'overview')">
+          <span class="op-icon">🔍</span> Overview & Issues
+        </button>
+        <button class="op-btn" onclick="switchPanel(this,'deduplicate')">
+          <span class="op-icon">♻️</span> Deduplicate
+        </button>
+        <button class="op-btn" onclick="switchPanel(this,'missing')">
+          <span class="op-icon">🕳️</span> Handle Missing
+        </button>
+        <button class="op-btn" onclick="switchPanel(this,'transform')">
+          <span class="op-icon">⚙️</span> Transform & Format
+        </button>
+        <button class="op-btn" onclick="switchPanel(this,'filter')">
+          <span class="op-icon">🧹</span> Filter & Trim
+        </button>
+        <button class="op-btn" onclick="switchPanel(this,'validate')">
+          <span class="op-icon">✅</span> Validate & Flag
+        </button>
+        <button class="op-btn" onclick="switchPanel(this,'export')">
+          <span class="op-icon">💾</span> Export
+        </button>
+      </div>
+
+      <div class="sidebar-section">
+        <span class="sidebar-label">Quick Actions</span>
+        <button class="op-btn" onclick="runAllCleaning()">
+          <span class="op-icon">🚀</span> Run All Cleaners
+        </button>
+        <button class="op-btn" onclick="resetData()">
+          <span class="op-icon">↩️</span> Reset to Original
+        </button>
+      </div>
+
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+      <!-- STATS BAR -->
+      <div class="stats-bar">
+        <div class="stat-item">
+          <div class="stat-label">Rows</div>
+          <div class="stat-value ok" id="stat-rows">—</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Columns</div>
+          <div class="stat-value ok" id="stat-cols">—</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Empty Cells</div>
+          <div class="stat-value warn" id="stat-empty">—</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Duplicates</div>
+          <div class="stat-value danger" id="stat-dups">—</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Issues Fixed</div>
+          <div class="stat-value ok" id="stat-fixed">0</div>
+        </div>
+      </div>
+
+      <!-- PANEL: OVERVIEW -->
+      <div class="panel active" id="panel-overview">
+        <div id="empty-state-overview" class="empty-state">
+          <div class="empty-icon">📊</div>
+          <h3>No data loaded yet</h3>
+          <p>Upload a CSV, TSV, or JSON file using the sidebar to begin inspecting and cleaning your data.</p>
+        </div>
+        <div id="overview-content" style="display:none">
+          <div class="panel-title">Data Preview</div>
+          <div class="panel-desc">Showing first 50 rows. Red cells = missing values. Yellow = duplicate rows.</div>
+          <div class="table-wrap" id="preview-table-wrap"></div>
+          <div style="margin-top:22px;">
+            <div class="panel-title" style="margin-bottom:10px;">Detected Issues</div>
+            <div class="issues-list" id="issues-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PANEL: DEDUPLICATE -->
+      <div class="panel" id="panel-deduplicate">
+        <div class="panel-title">Remove Duplicates</div>
+        <div class="panel-desc">Identify and remove rows with identical values across selected columns.</div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Scope</span>
+          <select id="dup-scope">
+            <option value="all">Entire row (all columns)</option>
+            <option value="col">Specific column</option>
+          </select>
+        </div>
+        <div class="ctrl-row" id="dup-col-row" style="display:none">
+          <span class="ctrl-label">Column</span>
+          <select id="dup-col-select"></select>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Keep</span>
+          <select id="dup-keep">
+            <option value="first">First occurrence</option>
+            <option value="last">Last occurrence</option>
+            <option value="none">Remove all duplicates</option>
+          </select>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Case sensitive</span>
+          <label class="toggle"><input type="checkbox" id="dup-case" checked><span class="slider-track"></span></label>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="runDeduplicate()">Remove Duplicates</button>
+          <button class="btn btn-ghost" onclick="previewDuplicates()">Preview Count</button>
+        </div>
+        <div class="log-wrap" id="log-deduplicate"><div class="log-entry"><span class="ts">--:--:--</span><span class="msg">Ready — load a file to begin</span></div></div>
+      </div>
+
+      <!-- PANEL: MISSING -->
+      <div class="panel" id="panel-missing">
+        <div class="panel-title">Handle Missing Values</div>
+        <div class="panel-desc">Choose how to treat empty cells and null values across your dataset.</div>
+        <div class="option-grid">
+          <div class="option-card selected" data-grp="missing" data-val="drop-rows" onclick="selectOption(this,'missing')">
+            <div class="check">✓</div>
+            <div class="oc-icon">🗑️</div>
+            <div class="oc-title">Drop rows</div>
+            <div class="oc-desc">Remove rows with any empty cell</div>
+          </div>
+          <div class="option-card" data-grp="missing" data-val="fill-mean" onclick="selectOption(this,'missing')">
+            <div class="check">✓</div>
+            <div class="oc-icon">📐</div>
+            <div class="oc-title">Fill with mean</div>
+            <div class="oc-desc">Numeric columns only</div>
+          </div>
+          <div class="option-card" data-grp="missing" data-val="fill-median" onclick="selectOption(this,'missing')">
+            <div class="check">✓</div>
+            <div class="oc-icon">〰️</div>
+            <div class="oc-title">Fill with median</div>
+            <div class="oc-desc">Robust to outliers</div>
+          </div>
+          <div class="option-card" data-grp="missing" data-val="fill-zero" onclick="selectOption(this,'missing')">
+            <div class="check">✓</div>
+            <div class="oc-icon">0️⃣</div>
+            <div class="oc-title">Fill with zero</div>
+            <div class="oc-desc">Replace empty with 0</div>
+          </div>
+          <div class="option-card" data-grp="missing" data-val="fill-custom" onclick="selectOption(this,'missing')">
+            <div class="check">✓</div>
+            <div class="oc-icon">✏️</div>
+            <div class="oc-title">Custom value</div>
+            <div class="oc-desc">Fill with a specific value</div>
+          </div>
+          <div class="option-card" data-grp="missing" data-val="flag" onclick="selectOption(this,'missing')">
+            <div class="check">✓</div>
+            <div class="oc-icon">🚩</div>
+            <div class="oc-title">Flag only</div>
+            <div class="oc-desc">Add an is_missing column</div>
+          </div>
+        </div>
+        <div class="ctrl-row" id="custom-val-row" style="display:none;">
+          <span class="ctrl-label">Custom fill value</span>
+          <input type="text" id="custom-fill-val" placeholder="e.g. N/A" style="width:160px;">
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="runMissingHandler()">Apply</button>
+        </div>
+        <div class="log-wrap" id="log-missing"><div class="log-entry"><span class="ts">--:--:--</span><span class="msg">Ready — load a file to begin</span></div></div>
+      </div>
+
+      <!-- PANEL: TRANSFORM -->
+      <div class="panel" id="panel-transform">
+        <div class="panel-title">Transform & Format</div>
+        <div class="panel-desc">Standardize values, fix casing, data types, whitespace and more.</div>
+        <div class="transform-grid">
+          <div class="transform-item">
+            <div><div class="oc-title">Trim whitespace</div><div class="ti-desc">Remove leading/trailing spaces</div></div>
+            <label class="toggle"><input type="checkbox" id="t-trim" checked><span class="slider-track"></span></label>
+          </div>
+          <div class="transform-item">
+            <div><div class="oc-title">Lowercase headers</div><div class="ti-desc">Normalize column names</div></div>
+            <label class="toggle"><input type="checkbox" id="t-header-lower"><span class="slider-track"></span></label>
+          </div>
+          <div class="transform-item">
+            <div><div class="oc-title">Remove special chars</div><div class="ti-desc">Strip non-alphanumeric from text</div></div>
+            <label class="toggle"><input type="checkbox" id="t-special"><span class="slider-track"></span></label>
+          </div>
+          <div class="transform-item">
+            <div><div class="oc-title">Normalize numbers</div><div class="ti-desc">Remove commas from numerics</div></div>
+            <label class="toggle"><input type="checkbox" id="t-numbers" checked><span class="slider-track"></span></label>
+          </div>
+          <div class="transform-item">
+            <div><div class="oc-title">Standardize dates</div><div class="ti-desc">Convert to YYYY-MM-DD format</div></div>
+            <label class="toggle"><input type="checkbox" id="t-dates"><span class="slider-track"></span></label>
+          </div>
+          <div class="transform-item">
+            <div><div class="oc-title">Remove empty columns</div><div class="ti-desc">Drop fully-null columns</div></div>
+            <label class="toggle"><input type="checkbox" id="t-empty-cols"><span class="slider-track"></span></label>
+          </div>
+          <div class="transform-item">
+            <div><div class="oc-title">Collapse multi-spaces</div><div class="ti-desc">Replace multiple spaces with one</div></div>
+            <label class="toggle"><input type="checkbox" id="t-multi-space" checked><span class="slider-track"></span></label>
+          </div>
+          <div class="transform-item">
+            <div><div class="oc-title">Strip HTML tags</div><div class="ti-desc">Remove &lt;tag&gt; from cell values</div></div>
+            <label class="toggle"><input type="checkbox" id="t-html"><span class="slider-track"></span></label>
+          </div>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Text casing</span>
+          <select id="t-case">
+            <option value="none">— no change —</option>
+            <option value="upper">UPPERCASE</option>
+            <option value="lower">lowercase</option>
+            <option value="title">Title Case</option>
+            <option value="sentence">Sentence case</option>
+          </select>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="runTransform()">Apply Transforms</button>
+        </div>
+        <div class="log-wrap" id="log-transform"><div class="log-entry"><span class="ts">--:--:--</span><span class="msg">Ready — load a file to begin</span></div></div>
+      </div>
+
+      <!-- PANEL: FILTER -->
+      <div class="panel" id="panel-filter">
+        <div class="panel-title">Filter & Trim</div>
+        <div class="panel-desc">Remove or keep rows based on column conditions and value patterns.</div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Column</span>
+          <select id="filter-col"></select>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Condition</span>
+          <select id="filter-cond">
+            <option value="contains">contains</option>
+            <option value="not-contains">does not contain</option>
+            <option value="equals">equals</option>
+            <option value="not-equals">not equals</option>
+            <option value="starts-with">starts with</option>
+            <option value="ends-with">ends with</option>
+            <option value="greater">greater than (numeric)</option>
+            <option value="less">less than (numeric)</option>
+            <option value="empty">is empty</option>
+            <option value="not-empty">is not empty</option>
+          </select>
+        </div>
+        <div class="ctrl-row" id="filter-val-row">
+          <span class="ctrl-label">Value</span>
+          <input type="text" id="filter-val" placeholder="filter value…" style="width:200px;">
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Action</span>
+          <select id="filter-action">
+            <option value="remove">Remove matching rows</option>
+            <option value="keep">Keep matching rows only</option>
+          </select>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="runFilter()">Apply Filter</button>
+          <button class="btn btn-ghost" onclick="previewFilter()">Preview Count</button>
+        </div>
+        <div class="log-wrap" id="log-filter"><div class="log-entry"><span class="ts">--:--:--</span><span class="msg">Ready — load a file to begin</span></div></div>
+      </div>
+
+      <!-- PANEL: VALIDATE -->
+      <div class="panel" id="panel-validate">
+        <div class="panel-title">Validate & Flag</div>
+        <div class="panel-desc">Check data types, detect outliers, and flag constraint violations.</div>
+        <div class="option-grid">
+          <div class="option-card selected" data-grp="validate" data-val="types" onclick="toggleValidation(this)">
+            <div class="check">✓</div>
+            <div class="oc-icon">🔢</div>
+            <div class="oc-title">Type check</div>
+            <div class="oc-desc">Find columns with mixed types</div>
+          </div>
+          <div class="option-card selected" data-grp="validate" data-val="outliers" onclick="toggleValidation(this)">
+            <div class="check">✓</div>
+            <div class="oc-icon">📈</div>
+            <div class="oc-title">Outlier detection</div>
+            <div class="oc-desc">IQR method, flags extremes</div>
+          </div>
+          <div class="option-card selected" data-grp="validate" data-val="email" onclick="toggleValidation(this)">
+            <div class="check">✓</div>
+            <div class="oc-icon">📧</div>
+            <div class="oc-title">Email format</div>
+            <div class="oc-desc">Validate email patterns</div>
+          </div>
+          <div class="option-card" data-grp="validate" data-val="phone" onclick="toggleValidation(this)">
+            <div class="check">✓</div>
+            <div class="oc-icon">📱</div>
+            <div class="oc-title">Phone format</div>
+            <div class="oc-desc">Detect malformed phone numbers</div>
+          </div>
+          <div class="option-card" data-grp="validate" data-val="dates" onclick="toggleValidation(this)">
+            <div class="check">✓</div>
+            <div class="oc-icon">📅</div>
+            <div class="oc-title">Date validity</div>
+            <div class="oc-desc">Check for invalid dates</div>
+          </div>
+          <div class="option-card" data-grp="validate" data-val="negative" onclick="toggleValidation(this)">
+            <div class="check">✓</div>
+            <div class="oc-icon">➖</div>
+            <div class="oc-title">Negative values</div>
+            <div class="oc-desc">Flag unexpected negatives</div>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="runValidation()">Run Validation</button>
+        </div>
+        <div class="log-wrap" id="log-validate"><div class="log-entry"><span class="ts">--:--:--</span><span class="msg">Ready — load a file to begin</span></div></div>
+      </div>
+
+      <!-- PANEL: EXPORT -->
+      <div class="panel" id="panel-export">
+        <div class="panel-title">Export Cleaned Data</div>
+        <div class="panel-desc">Download your cleaned dataset in your preferred format.</div>
+        <div class="export-grid">
+          <div class="export-card" onclick="exportData('csv')">
+            <div class="ec-icon">📄</div>
+            <div class="ec-title">CSV</div>
+            <div class="ec-ext">.csv</div>
+          </div>
+          <div class="export-card" onclick="exportData('tsv')">
+            <div class="ec-icon">📋</div>
+            <div class="ec-title">TSV</div>
+            <div class="ec-ext">.tsv</div>
+          </div>
+          <div class="export-card" onclick="exportData('json')">
+            <div class="ec-icon">{ }</div>
+            <div class="ec-title">JSON</div>
+            <div class="ec-ext">.json</div>
+          </div>
+        </div>
+        <div style="margin-top:22px;">
+          <div class="panel-title" style="font-size:14px;margin-bottom:12px;">Export Options</div>
+          <div class="ctrl-row">
+            <span class="ctrl-label">Include header row</span>
+            <label class="toggle"><input type="checkbox" id="exp-header" checked><span class="slider-track"></span></label>
+          </div>
+          <div class="ctrl-row">
+            <span class="ctrl-label">Include row index</span>
+            <label class="toggle"><input type="checkbox" id="exp-index"><span class="slider-track"></span></label>
+          </div>
+          <div class="ctrl-row">
+            <span class="ctrl-label">Filename</span>
+            <input type="text" id="exp-filename" value="cleaned_data" style="width:200px;">
+          </div>
+        </div>
+        <div class="summary-box">
+          <div class="sb-label">Export Summary</div>
+          <p id="export-summary">Load a file first to see export summary.</p>
+        </div>
+      </div>
+
+    </div><!-- end content -->
+  </div><!-- end main -->
+</div><!-- end app -->
+
+<script>
+  let originalData = null;
+  let cleanData = null;
+  let headers = [];
+  let fixedCount = 0;
+
+  function ts() { return new Date().toTimeString().slice(0,8); }
+
+  function log(panelId, msg, type='ok') {
+    const w = document.getElementById('log-'+panelId);
+    if (!w) return;
+    const e = document.createElement('div');
+    e.className = 'log-entry ' + type;
+    e.innerHTML = `<span class="ts">${ts()}</span><span class="msg">${msg}</span>`;
+    w.appendChild(e);
+    w.scrollTop = w.scrollHeight;
+  }
+
+  function updateStats() {
+    if (!cleanData) return;
+    document.getElementById('stat-rows').textContent = cleanData.length;
+    document.getElementById('stat-cols').textContent = headers.length;
+    let empty = 0;
+    cleanData.forEach(r => r.forEach(c => { if (c === '' || c === null || c === undefined) empty++; }));
+    document.getElementById('stat-empty').textContent = empty;
+    const seen = new Set(); let dups = 0;
+    cleanData.forEach(r => { const k = r.join('|'); if (seen.has(k)) dups++; seen.add(k); });
+    document.getElementById('stat-dups').textContent = dups;
+    document.getElementById('stat-fixed').textContent = fixedCount;
+  }
+
+  function parseCSV(text, sep=',') {
+    const lines = text.trim().split(/\r?\n/);
+    return lines.map(l => {
+      const row = []; let cur = ''; let inQ = false;
+      for (let i = 0; i < l.length; i++) {
+        if (l[i] === '"') { inQ = !inQ; }
+        else if (l[i] === sep && !inQ) { row.push(cur); cur = ''; }
+        else cur += l[i];
+      }
+      row.push(cur);
+      return row;
+    });
+  }
+
+  function parseJSON(text) {
+    const arr = JSON.parse(text);
+    if (!arr.length) return { headers: [], rows: [] };
+    const h = Object.keys(arr[0]);
+    const rows = arr.map(o => h.map(k => (o[k] === undefined || o[k] === null) ? '' : String(o[k])));
+    return { headers: h, rows };
+  }
+
+  document.getElementById('file-input').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) loadFile(file);
+  });
+
+  const uz = document.getElementById('upload-zone');
+  uz.addEventListener('dragover', e => { e.preventDefault(); uz.classList.add('drag-over'); });
+  uz.addEventListener('dragleave', () => uz.classList.remove('drag-over'));
+  uz.addEventListener('drop', e => {
+    e.preventDefault(); uz.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) loadFile(file);
+  });
+
+  function loadFile(file) {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const text = ev.target.result;
+      const ext = file.name.split('.').pop().toLowerCase();
+      try {
+        if (ext === 'json') {
+          const r = parseJSON(text);
+          headers = r.headers;
+          originalData = r.rows;
+        } else if (ext === 'tsv') {
+          const rows = parseCSV(text, '\t');
+          headers = rows[0]; originalData = rows.slice(1);
+        } else {
+          const rows = parseCSV(text);
+          headers = rows[0]; originalData = rows.slice(1);
+        }
+        cleanData = originalData.map(r => [...r]);
+        fixedCount = 0;
+        document.getElementById('file-badge').textContent = file.name + ' (' + originalData.length + ' rows)';
+        updateStats(); renderPreview(); renderIssues(); populateColSelects();
+        document.getElementById('empty-state-overview').style.display = 'none';
+        document.getElementById('overview-content').style.display = 'block';
+        updateExportSummary();
+      } catch(err) {
+        alert('Error parsing file: ' + err.message);
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function renderPreview() {
+    if (!cleanData) return;
+    const wrap = document.getElementById('preview-table-wrap');
+    const seen = new Set(); const dupRows = new Set();
+    cleanData.forEach((r, i) => { const k = r.join('|'); if (seen.has(k)) dupRows.add(i); seen.add(k); });
+    let html = '<table><thead><tr><th>#</th>';
+    headers.forEach(h => { html += `<th>${h}</th>`; });
+    html += '</tr></thead><tbody>';
+    cleanData.slice(0, 50).forEach((row, i) => {
+      const isDup = dupRows.has(i);
+      html += `<tr><td class="row-index">${i+1}</td>`;
+      row.forEach(cell => {
+        const isEmpty = cell === '' || cell === null || cell === undefined;
+        const cls = isEmpty ? 'cell-empty' : (isDup ? 'cell-dup' : '');
+        html += `<td class="${cls}">${isEmpty ? 'empty' : cell}</td>`;
+      });
+      html += `</tr>`;
+    });
+    html += '</tbody></table>';
+    wrap.innerHTML = html;
+  }
+
+  function renderIssues() {
+    const list = document.getElementById('issues-list');
+    const issues = [];
+    let emptyCount = 0, dupCount = 0, typeIssues = 0;
+    const seen = new Set();
+    cleanData.forEach(r => {
+      r.forEach(c => { if (c === '' || c === null) emptyCount++; });
+      const k = r.join('|'); if (seen.has(k)) dupCount++; seen.add(k);
+    });
+    headers.forEach((h, ci) => {
+      let hasNum = 0, hasText = 0;
+      cleanData.forEach(r => { const v = r[ci]; if (v !== '' && v !== null) { isNaN(v) ? hasText++ : hasNum++; } });
+      if (hasNum > 0 && hasText > 0) typeIssues++;
+    });
+    if (emptyCount > 0) issues.push({tag:'empty', label:'Missing Values', msg:`${emptyCount} empty cells detected`});
+    if (dupCount > 0) issues.push({tag:'dup', label:'Duplicates', msg:`${dupCount} duplicate rows detected`});
+    if (typeIssues > 0) issues.push({tag:'type', label:'Type Mismatch', msg:`${typeIssues} columns have mixed numeric/text values`});
+    if (issues.length === 0) issues.push({tag:'format', label:'Clean', msg:'No major issues detected — data looks good!'});
+    list.innerHTML = issues.map(i => `
+      <div class="issue-item">
+        <span class="issue-tag ${i.tag}">${i.label}</span>
+        <span style="font-size:12px;color:var(--text)">${i.msg}</span>
+      </div>`).join('');
+  }
+
+  function populateColSelects() {
+    ['dup-col-select','filter-col'].forEach(id => {
+      const s = document.getElementById(id);
+      if (!s) return;
+      s.innerHTML = headers.map((h, i) => `<option value="${i}">${h}</option>`).join('');
+    });
+  }
+
+  function switchPanel(btn, panelId) {
+    document.querySelectorAll('.op-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-'+panelId).classList.add('active');
+  }
+
+  function selectOption(card, grp) {
+    document.querySelectorAll(`.option-card[data-grp="${grp}"]`).forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+    if (grp === 'missing') {
+      document.getElementById('custom-val-row').style.display = card.dataset.val === 'fill-custom' ? 'flex' : 'none';
+    }
+  }
+
+  function toggleValidation(card) { card.classList.toggle('selected'); }
+
+  document.getElementById('dup-scope').addEventListener('change', function() {
+    document.getElementById('dup-col-row').style.display = this.value === 'col' ? 'flex' : 'none';
+  });
+  document.getElementById('filter-cond').addEventListener('change', function() {
+    document.getElementById('filter-val-row').style.display = ['empty','not-empty'].includes(this.value) ? 'none' : 'flex';
+  });
+
+  function mean(arr) { return arr.reduce((a,b) => a+b, 0) / arr.length; }
+  function median(arr) {
+    const s = [...arr].sort((a,b) => a-b); const m = Math.floor(s.length/2);
+    return s.length % 2 ? s[m] : (s[m-1]+s[m])/2;
+  }
+
+  function runDeduplicate() {
+    if (!cleanData) return log('deduplicate','No data loaded','err');
+    const scope = document.getElementById('dup-scope').value;
+    const keep = document.getElementById('dup-keep').value;
+    const caseSens = document.getElementById('dup-case').checked;
+    const colIdx = parseInt(document.getElementById('dup-col-select').value) || 0;
+    const getKey = row => { const v = scope==='all' ? row.join('|||') : row[colIdx]; return caseSens ? v : v.toLowerCase(); };
+    const before = cleanData.length;
+    const seen = new Map();
+    cleanData.forEach((row, i) => { const k = getKey(row); if (!seen.has(k)) seen.set(k,[i]); else seen.get(k).push(i); });
+    let keepIdxs = new Set();
+    seen.forEach((idxs) => {
+      if (keep === 'first') keepIdxs.add(idxs[0]);
+      else if (keep === 'last') keepIdxs.add(idxs[idxs.length-1]);
+    });
+    cleanData = cleanData.filter((_, i) => {
+      if (keep === 'none') return ![...seen.values()].some(a => a.length > 1 && a.includes(i));
+      return keepIdxs.has(i);
+    });
+    const removed = before - cleanData.length;
+    fixedCount += removed;
+    updateStats(); renderPreview(); renderIssues();
+    log('deduplicate', `Removed ${removed} duplicate rows. ${cleanData.length} rows remain.`, removed > 0 ? 'ok' : 'warn');
+  }
+
+  function previewDuplicates() {
+    if (!cleanData) return;
+    const seen = new Set(); let c = 0;
+    cleanData.forEach(r => { const k = r.join('|'); if (seen.has(k)) c++; seen.add(k); });
+    log('deduplicate', `Found ${c} duplicate rows in current dataset.`, c > 0 ? 'warn' : 'ok');
+  }
+
+  function runMissingHandler() {
+    if (!cleanData) return log('missing','No data loaded','err');
+    const selected = document.querySelector('.option-card.selected[data-grp="missing"]');
+    if (!selected) return;
+    const method = selected.dataset.val;
+    const customVal = document.getElementById('custom-fill-val').value || 'N/A';
+    let changes = 0;
+    if (method === 'drop-rows') {
+      const before = cleanData.length;
+      cleanData = cleanData.filter(r => r.every(c => c !== '' && c !== null && c !== undefined));
+      changes = before - cleanData.length;
+      log('missing', `Dropped ${changes} rows with missing values.`,'ok');
+    } else if (method === 'fill-mean' || method === 'fill-median') {
+      headers.forEach((_, ci) => {
+        const nums = cleanData.map(r => r[ci]).filter(v => v !== '' && !isNaN(v)).map(Number);
+        if (!nums.length) return;
+        const fill = method === 'fill-mean' ? mean(nums) : median(nums);
+        cleanData.forEach(r => { if (r[ci] === '' || r[ci] === null) { r[ci] = fill.toFixed(2); changes++; } });
+      });
+      log('missing', `Filled ${changes} cells with ${method === 'fill-mean' ? 'mean' : 'median'} values.`,'ok');
+    } else if (method === 'fill-zero') {
+      cleanData.forEach(r => r.forEach((c,i) => { if (c === '' || c === null) { r[i] = '0'; changes++; } }));
+      log('missing', `Filled ${changes} empty cells with 0.`,'ok');
+    } else if (method === 'fill-custom') {
+      cleanData.forEach(r => r.forEach((c,i) => { if (c === '' || c === null) { r[i] = customVal; changes++; } }));
+      log('missing', `Filled ${changes} empty cells with "${customVal}".`,'ok');
+    } else if (method === 'flag') {
+      const hasMissing = cleanData.some(r => r.some(c => c === '' || c === null));
+      if (hasMissing) {
+        headers.push('_is_missing');
+        cleanData.forEach(r => { r.push(r.some(c => c === '' || c === null) ? '1' : '0'); });
+        changes = 1;
+        log('missing', 'Added _is_missing flag column.', 'ok');
+      } else { log('missing', 'No missing values to flag.', 'warn'); }
+    }
+    fixedCount += changes;
+    updateStats(); renderPreview(); renderIssues(); updateExportSummary();
+  }
+
+  function runTransform() {
+    if (!cleanData) return log('transform','No data loaded','err');
+    let changes = 0;
+    const trim = document.getElementById('t-trim').checked;
+    const hlower = document.getElementById('t-header-lower').checked;
+    const special = document.getElementById('t-special').checked;
+    const nums = document.getElementById('t-numbers').checked;
+    const emptyCols = document.getElementById('t-empty-cols').checked;
+    const multiSpace = document.getElementById('t-multi-space').checked;
+    const stripHtml = document.getElementById('t-html').checked;
+    const casing = document.getElementById('t-case').value;
+    if (hlower) { headers = headers.map(h => h.toLowerCase().replace(/\s+/g,'_')); changes++; }
+    if (emptyCols) {
+      const empty = headers.map((_, ci) => cleanData.every(r => r[ci] === '' || r[ci] === null));
+      headers = headers.filter((_, ci) => !empty[ci]);
+      cleanData = cleanData.map(r => r.filter((_, ci) => !empty[ci]));
+      const removed = empty.filter(Boolean).length;
+      if (removed) { log('transform', `Removed ${removed} empty columns.`,'ok'); changes += removed; }
+    }
+    cleanData.forEach(r => r.forEach((v, i) => {
+      let val = String(v === null || v === undefined ? '' : v);
+      if (trim && val !== val.trim()) { val = val.trim(); changes++; }
+      if (multiSpace && /  +/.test(val)) { val = val.replace(/  +/g, ' '); changes++; }
+      if (stripHtml) { const s = val.replace(/<[^>]*>/g,''); if (s !== val) { val = s; changes++; } }
+      if (special) { const c = val.replace(/[^a-zA-Z0-9 .,!?@#$%\-]/g,''); if (c !== val) { val = c; changes++; } }
+      if (nums && /^[\d,]+\.?\d*$/.test(val.replace(/,/g,''))) { val = val.replace(/,/g,''); }
+      if (casing === 'upper' && val !== val.toUpperCase()) { val = val.toUpperCase(); changes++; }
+      else if (casing === 'lower' && val !== val.toLowerCase()) { val = val.toLowerCase(); changes++; }
+      else if (casing === 'title') { val = val.replace(/\b\w/g, c => c.toUpperCase()); changes++; }
+      else if (casing === 'sentence' && val) { val = val.charAt(0).toUpperCase() + val.slice(1).toLowerCase(); changes++; }
+      r[i] = val;
+    }));
+    fixedCount += changes;
+    updateStats(); renderPreview(); renderIssues(); updateExportSummary();
+    log('transform', `Applied transforms. ${changes} cell modifications made.`, 'ok');
+    populateColSelects();
+  }
+
+  function runFilter() {
+    if (!cleanData) return log('filter','No data loaded','err');
+    const colIdx = parseInt(document.getElementById('filter-col').value);
+    const cond = document.getElementById('filter-cond').value;
+    const val = document.getElementById('filter-val').value;
+    const action = document.getElementById('filter-action').value;
+    const matches = r => {
+      const cv = String(r[colIdx] || '').toLowerCase(); const fv = val.toLowerCase();
+      switch(cond) {
+        case 'contains': return cv.includes(fv);
+        case 'not-contains': return !cv.includes(fv);
+        case 'equals': return cv === fv;
+        case 'not-equals': return cv !== fv;
+        case 'starts-with': return cv.startsWith(fv);
+        case 'ends-with': return cv.endsWith(fv);
+        case 'greater': return parseFloat(r[colIdx]) > parseFloat(val);
+        case 'less': return parseFloat(r[colIdx]) < parseFloat(val);
+        case 'empty': return r[colIdx] === '' || r[colIdx] === null || r[colIdx] === undefined;
+        case 'not-empty': return r[colIdx] !== '' && r[colIdx] !== null && r[colIdx] !== undefined;
+        default: return false;
+      }
+    };
+    const before = cleanData.length;
+    cleanData = action === 'remove' ? cleanData.filter(r => !matches(r)) : cleanData.filter(r => matches(r));
+    const changed = before - cleanData.length;
+    fixedCount += Math.abs(changed);
+    updateStats(); renderPreview(); renderIssues(); updateExportSummary();
+    log('filter', `Filter applied. ${Math.abs(changed)} rows affected. ${cleanData.length} rows remain.`, 'ok');
+  }
+
+  function previewFilter() {
+    if (!cleanData) return;
+    const colIdx = parseInt(document.getElementById('filter-col').value);
+    const cond = document.getElementById('filter-cond').value;
+    const val = document.getElementById('filter-val').value;
+    const matches = r => {
+      const cv = String(r[colIdx] || '').toLowerCase(); const fv = val.toLowerCase();
+      if (cond === 'contains') return cv.includes(fv);
+      if (cond === 'equals') return cv === fv;
+      if (cond === 'empty') return r[colIdx] === '' || r[colIdx] === null;
+      return cv.includes(fv);
+    };
+    const c = cleanData.filter(r => matches(r)).length;
+    log('filter', `Preview: ${c} rows match the current filter condition.`, 'warn');
+  }
+
+  function runValidation() {
+    if (!cleanData) return log('validate','No data loaded','err');
+    const selected = [...document.querySelectorAll('.option-card.selected[data-grp="validate"]')].map(c => c.dataset.val);
+    let findings = [];
+    if (selected.includes('types')) {
+      headers.forEach((h, ci) => {
+        let n = 0, t = 0;
+        cleanData.forEach(r => { const v = r[ci]; if (v !== '' && v !== null) { isNaN(v) ? t++ : n++; } });
+        if (n > 0 && t > 0) findings.push(`Type mismatch in "${h}": ${n} numeric + ${t} text values`);
+      });
+    }
+    if (selected.includes('email')) {
+      headers.forEach((h, ci) => {
+        if (!/email/i.test(h)) return;
+        let bad = 0;
+        cleanData.forEach(r => { const v = r[ci]; if (v && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) bad++; });
+        if (bad) findings.push(`${bad} invalid email(s) in column "${h}"`);
+      });
+    }
+    if (selected.includes('outliers')) {
+      headers.forEach((h, ci) => {
+        const vals = cleanData.map(r => parseFloat(r[ci])).filter(v => !isNaN(v));
+        if (vals.length < 4) return;
+        const s = [...vals].sort((a,b) => a-b);
+        const q1 = s[Math.floor(s.length/4)], q3 = s[Math.floor(s.length*3/4)];
+        const iqr = q3-q1, lo = q1-1.5*iqr, hi = q3+1.5*iqr;
+        const out = vals.filter(v => v < lo || v > hi).length;
+        if (out > 0) findings.push(`${out} outlier(s) in "${h}" (IQR method)`);
+      });
+    }
+    if (selected.includes('negative')) {
+      headers.forEach((h, ci) => {
+        const neg = cleanData.filter(r => parseFloat(r[ci]) < 0).length;
+        if (neg > 0) findings.push(`${neg} negative value(s) in "${h}"`);
+      });
+    }
+    if (findings.length === 0) findings.push('All validations passed. Data looks clean!');
+    findings.forEach(f => log('validate', f, f.includes('passed') ? 'ok' : 'warn'));
+  }
+
+  function runAllCleaning() {
+    if (!cleanData) { alert('Load a file first!'); return; }
+    document.getElementById('t-trim').checked = true;
+    document.getElementById('t-numbers').checked = true;
+    document.getElementById('t-multi-space').checked = true;
+    runDeduplicate();
+    runTransform();
+  }
+
+  function resetData() {
+    if (!originalData) { alert('No original data to reset to.'); return; }
+    cleanData = originalData.map(r => [...r]);
+    fixedCount = 0;
+    updateStats(); renderPreview(); renderIssues(); updateExportSummary();
+  }
+
+  function updateExportSummary() {
+    const el = document.getElementById('export-summary');
+    if (!cleanData) { el.textContent = 'Load a file first to see export summary.'; return; }
+    el.textContent = `${cleanData.length} rows × ${headers.length} columns ready — ${fixedCount} total modifications applied.`;
+  }
+
+  function exportData(fmt) {
+    if (!cleanData) { alert('No data to export. Load and clean a file first.'); return; }
+    const inclHeader = document.getElementById('exp-header').checked;
+    const inclIndex = document.getElementById('exp-index').checked;
+    const fname = document.getElementById('exp-filename').value || 'cleaned_data';
+    let content = '', mime = 'text/plain', ext = fmt;
+    const rows = inclHeader ? [headers, ...cleanData] : cleanData;
+    if (fmt === 'csv') {
+      content = rows.map((r, ri) => {
+        const row = inclIndex ? [(ri === 0 && inclHeader ? '#' : ri), ...r] : r;
+        return row.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',');
+      }).join('\n');
+      mime = 'text/csv';
+    } else if (fmt === 'tsv') {
+      content = rows.map((r, ri) => {
+        const row = inclIndex ? [(ri === 0 && inclHeader ? '#' : ri), ...r] : r;
+        return row.join('\t');
+      }).join('\n');
+      mime = 'text/tab-separated-values';
+    } else if (fmt === 'json') {
+      const dataRows = cleanData;
+      content = JSON.stringify(dataRows.map(r => Object.fromEntries(headers.map((k,i) => [k, r[i]]))), null, 2);
+      mime = 'application/json';
+    }
+    const blob = new Blob([content], { type: mime });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `${fname}.${ext}`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+</script>
+</body>
+</html>
